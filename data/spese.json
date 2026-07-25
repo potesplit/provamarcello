@@ -1,1 +1,16 @@
-[]
+[
+  {
+    "nome": "filippo",
+    "descrizione": "spesanonequa [NE]",
+    "importo": 15,
+    "partecipanti": [
+      "ele",
+      "filippo"
+    ],
+    "gruppoId": "gms0l7dfv8rlafv",
+    "quote": {
+      "ele": 12,
+      "filippo": 3
+    }
+  }
+]
