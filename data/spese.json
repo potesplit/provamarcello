@@ -10,5 +10,21 @@
     "quote": {
       "filippo2": 2
     }
+  },
+  {
+    "nome": "Delpierp",
+    "descrizione": "Dro$a -- [NE]",
+    "importo": 58,
+    "partecipanti": [
+      "Delpierp",
+      "Obama",
+      "Totti"
+    ],
+    "gruppoId": "gms0mfpyz4uaxz3",
+    "quote": {
+      "Delpierp": 10,
+      "Obama": 20,
+      "Totti": 30
+    }
   }
 ]
