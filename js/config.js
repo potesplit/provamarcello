@@ -1,6 +1,6 @@
 const CONFIG = {
   owner: "potesplit",
-  repo: "prova",
+  repo: "provamarcello",
   branch: "main",
   homeUrl: "https://potewww.github.io/potesplit/"
 };
