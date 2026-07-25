@@ -1,1 +1,14 @@
-[]
+[
+  {
+    "nome": "filippo",
+    "descrizione": "Spesa solo Filippo [NE]",
+    "importo": 0.5,
+    "partecipanti": [
+      "filippo"
+    ],
+    "gruppoId": "gms0m3xsh16jy2a",
+    "quote": {
+      "filippo": 2
+    }
+  }
+]
