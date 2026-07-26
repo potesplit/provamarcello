@@ -61,11 +61,43 @@ function centesimi(v) {
 // Tra i partecipanti, individua quelli con l'importo minimo (o massimo) in "totaleCorrente"
 // (arrotondato al centesimo) e ne sceglie UNO A CASO tra chi è in parità: a parità di importo
 // speso, chi riceve/perde il centesimo residuo non è quindi prevedibile in anticipo.
-function sceltaCasualeTraPari(partecipanti, totaleCorrente, cercaMinimo) {
+// "rng" è opzionale: se non passato usa Math.random (comportamento "vero" casuale); se
+// passato (vedi distribuisciRestoCent) usa un generatore seedato per essere deterministico.
+function sceltaCasualeTraPari(partecipanti, totaleCorrente, cercaMinimo, rng) {
   const valori = partecipanti.map(n => centesimi(totaleCorrente[n]));
   const target = cercaMinimo ? Math.min(...valori) : Math.max(...valori);
   const candidati = partecipanti.filter((n, i) => valori[i] === target);
-  return candidati[Math.floor(Math.random() * candidati.length)];
+  const r = rng ? rng() : Math.random();
+  return candidati[Math.floor(r * candidati.length)];
+}
+
+// Serializza un valore in modo stabile (chiavi degli oggetti in ordine alfabetico), usato
+// per costruire un seed deterministico a partire dai dati di ingresso di una funzione.
+function stableStringify(v) {
+  if (v === null || typeof v !== "object") return JSON.stringify(v);
+  if (Array.isArray(v)) return "[" + v.map(stableStringify).join(",") + "]";
+  return "{" + Object.keys(v).sort().map(k => JSON.stringify(k) + ":" + stableStringify(v[k])).join(",") + "}";
+}
+
+// Hash di stringa -> intero a 32 bit (FNV-1a), usato come seed per mulberry32.
+function hashStringToSeed(str) {
+  let h = 2166136261 >>> 0;
+  for (let i = 0; i < str.length; i++) {
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+
+// PRNG deterministico (mulberry32): a parità di seed produce sempre la stessa sequenza.
+function mulberry32(seed) {
+  let a = seed >>> 0;
+  return function () {
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
 }
 
 // Distribuisce "restoCent" centesimi residui (interi, per costruzione sempre < numero di
@@ -75,13 +107,25 @@ function sceltaCasualeTraPari(partecipanti, totaleCorrente, cercaMinimo) {
 // prima di scegliere il centesimo successivo, così i centesimi non finiscono mai tutti sulla
 // stessa persona. Restituisce un array { nome, valore } di lunghezza restoCent (valore
 // sempre ±0.01, con lo stesso segno per tutta la lista).
+//
+// IMPORTANTE: la scelta "casuale" è seedata deterministicamente a partire dagli stessi dati
+// in ingresso (partecipanti, totali correnti, numero di centesimi, verso). Il calcolo di una
+// stessa cena/spesa viene rifatto da zero più volte durante il rendering della pagina (una
+// volta per la tabella "Altro", una per "Totali per persona", una per il Riepilogo globale,
+// ecc.): senza un seed deterministico, ogni ricalcolo potrebbe assegnare il centesimo residuo
+// a una persona diversa, facendo apparire tabelle diverse in disaccordo tra loro pur
+// descrivendo la stessa identica cena/spesa. Con lo stesso input, il risultato è sempre lo
+// stesso; cambia solo (in modo imprevedibile) quando cambiano i dati reali della cena/spesa.
 function distribuisciRestoCent(restoCent, partecipanti, totaleCorrente, cercaMinimo, segno) {
+  if (!restoCent || restoCent <= 0) return [];
   const risultati = [];
   const rimanenti = [...partecipanti];
   const correnteLocale = { ...totaleCorrente };
   const unitVal = 0.01 * segno;
+  const seed = hashStringToSeed(stableStringify({ partecipanti, totaleCorrente, restoCent, cercaMinimo, segno }));
+  const rng = mulberry32(seed);
   for (let i = 0; i < restoCent && rimanenti.length > 0; i++) {
-    const scelto = sceltaCasualeTraPari(rimanenti, correnteLocale, cercaMinimo);
+    const scelto = sceltaCasualeTraPari(rimanenti, correnteLocale, cercaMinimo, rng);
     risultati.push({ nome: scelto, valore: unitVal });
     correnteLocale[scelto] = (correnteLocale[scelto] || 0) + unitVal;
     rimanenti.splice(rimanenti.indexOf(scelto), 1);
