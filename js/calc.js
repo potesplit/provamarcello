@@ -503,12 +503,15 @@ function calcolaStatoGlobale(persone, speseBase, rimborsiData, ceneData) {
 }
 
 function calcolaTransazioni(saldi) {
+  // Soglia 0.005 (mezzo centesimo): serve solo a ignorare rumore di virgola mobile, NON a
+  // ignorare un vero saldo di 1 centesimo. Con soglia 0.01 (sbagliata) un saldo di esattamente
+  // -0.01/+0.01 veniva scartato e il relativo centesimo spariva dai rimborsi consigliati.
   const debitori = [];
   const creditori = [];
   for (const nome in saldi) {
     const s = saldi[nome];
-    if (s < -0.01) debitori.push({ nome, importo: -s });
-    else if (s > 0.01) creditori.push({ nome, importo: s });
+    if (s < -0.005) debitori.push({ nome, importo: -s });
+    else if (s > 0.005) creditori.push({ nome, importo: s });
   }
   debitori.sort((a, b) => a.nome.toLowerCase().localeCompare(b.nome.toLowerCase()));
   creditori.sort((a, b) => a.nome.toLowerCase().localeCompare(b.nome.toLowerCase()));
@@ -518,11 +521,11 @@ function calcolaTransazioni(saldi) {
   while (iD < debitori.length && iC < creditori.length) {
     const d = debitori[iD], c = creditori[iC];
     const imp = Math.min(d.importo, c.importo);
-    if (imp > 0.01) transazioni.push({ da: d.nome, a: c.nome, importo: imp });
+    if (imp > 0.005) transazioni.push({ da: d.nome, a: c.nome, importo: imp });
     d.importo -= imp;
     c.importo -= imp;
-    if (d.importo < 0.01) iD++;
-    if (c.importo < 0.01) iC++;
+    if (d.importo < 0.005) iD++;
+    if (c.importo < 0.005) iC++;
   }
   return transazioni;
 }
