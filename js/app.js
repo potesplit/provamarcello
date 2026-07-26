@@ -135,7 +135,7 @@ function renderTotaliPersona() {
   const { nomi, totaliPersona, spesaEffettiva, rimborsatoDA, rimborsatoA, saldi } = STATE.stato;
   nomi.forEach((nome, i) => {
     const saldo = saldi[nome];
-    const cls = saldo < -0.01 ? "row-red" : saldo > 0.01 ? "row-green" : "row-gray";
+    const cls = saldo < -0.005 ? "row-red" : saldo > 0.005 ? "row-green" : "row-gray";
     const tr = el("tr", cls, `<td>${i + 1}</td><td>${escapeHtml(nome)}</td><td class="num">${euro(totaliPersona[nome])}</td>
       <td class="num">${euro(spesaEffettiva[nome])}</td><td class="num">${euro(rimborsatoDA[nome])}</td>
       <td class="num">${euro(rimborsatoA[nome])}</td><td class="num"><strong>${euro(saldo)}</strong></td>`);
@@ -281,7 +281,7 @@ function renderTotaliECena(container, cena) {
   const d = calcolaDettaglioCena(cena);
   let html = `<div class="table-wrap"><table class="cena-table"><thead><tr><th>Persona</th><th>Dovuto</th><th>Pagato</th><th>Saldo pasto</th></tr></thead><tbody>`;
   d.righe.forEach(r => {
-    const cls = r.saldo > 0.01 ? "row-green" : r.saldo < -0.01 ? "row-red" : "";
+    const cls = r.saldo > 0.005 ? "row-green" : r.saldo < -0.005 ? "row-red" : "";
     html += `<tr class="${cls}"><td>${escapeHtml(r.nome)}</td><td class="num">${euro(r.dovuto)}</td><td class="num">${euro(r.pagato)}</td><td class="num">${euro(r.saldo)}</td></tr>`;
   });
   if (d.hasSconti) {
@@ -366,7 +366,7 @@ function renderRiepilogoGruppoSpesa(container, g) {
     </tr></thead><tbody>`;
   r.partecipanti.forEach(nome => {
     const saldo = r.saldi[nome] || 0;
-    const cls = saldo > 0.01 ? "row-green" : saldo < -0.01 ? "row-red" : "";
+    const cls = saldo > 0.005 ? "row-green" : saldo < -0.005 ? "row-red" : "";
     const centStr = formatEspressioneContributi(r.centesiminiDettaglio[nome]) || (r.centesimini[nome] ? r.centesimini[nome].toFixed(2) : "");
     html += `<tr class="${cls}"><td>${escapeHtml(nome)}</td>
       <td class="num">${r.pagato[nome] ? euro(r.pagato[nome]) : ""}</td>
