@@ -245,6 +245,19 @@
         "pagato": 0.04
       }
     ],
-    "speseCondivise": []
+    "speseCondivise": [
+      {
+        "descrizione": "acqua",
+        "tipo": "divisa",
+        "importo": 0.06,
+        "partecipanti": [
+          "Carlo",
+          "Delpierp",
+          "filippo2",
+          "Obama"
+        ],
+        "colonna": "acqua"
+      }
+    ]
   }
 ]
